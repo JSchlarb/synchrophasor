@@ -1,0 +1,167 @@
+pmu:
+  # PMU identification
+  station: "CENTRAL"
+  name_prefix: "PMU"
+
+  ip: "0.0.0.0"
+  port: 4712
+  metrics_port: 9090
+
+  voltage_base: 230
+  current_base: 2000
+  frequency_base: 50
+
+  voltage_variation: 0.005
+  current_variation: 0.005
+  frequency_variation: 0.001
+  dfreq_variation: 0.01
+
+  time_base: 1000000
+  data_rate: 50  # fps
+
+  data_format:
+    polar: true
+    phasor_float: true
+    analog_float: true
+    freq_float: true
+
+  phasors:
+    - name: "VA"
+      type: 0  # voltage
+      scale: 0
+      phase_angle: 0
+      base_value: "voltage"
+
+    - name: "VB"
+      type: 0  # voltage
+      scale: 0
+      phase_angle: 2.0944  # 120°
+      base_value: "voltage"
+
+    - name: "VC"
+      type: 0  # voltage
+      scale: 0
+      phase_angle: -2.0944  # -120°
+      base_value: "voltage"
+
+    - name: "IA"
+      type: 1  # current
+      scale: 0
+      phase_angle: 0
+      base_value: "current"
+
+    - name: "IB"
+      type: 1  # current
+      scale: 0
+      phase_angle: 2.0944
+      base_value: "current"
+
+    - name: "IC"
+      type: 1  # current
+      scale: 0
+      phase_angle: -2.0944
+      base_value: "current"
+
+  # Analog channels with different generator types
+  analog_channels:
+    # System frequency measurement
+    - name: "FREQUENCY"
+      unit: "Hz"
+      scale: 100
+      base_value: 50
+      variation: 0.001
+      generator_type: "random"
+
+    # Active power with sine wave variation
+    - name: "ACTIVE_POWER"
+      unit: "MW"
+      scale: 1
+      base_value: 1500
+      variation: 0.05
+      generator_type: "sine"
+      generator_params:
+        frequency: 0.1  # 0.1 Hz oscillation
+        offset: 1500
+        amplitude: 75
+
+    # Reactive power
+    - name: "REACTIVE_POWER"
+      unit: "MVAr"
+      scale: 1
+      base_value: 300
+      variation: 0.1
+      generator_type: "random"
+
+    # Voltage magnitude
+    - name: "VOLTAGE_MAG"
+      unit: "kV"
+      scale: 10
+      base_value: 230
+      variation: 0.005
+      generator_type: "sine"
+      generator_params:
+        frequency: 0.05
+        offset: 230
+        amplitude: 1.15
+
+    # Temperature (constant)
+    - name: "TEMP_TRANSFORMER"
+      unit: "°C"
+      scale: 10
+      base_value: 65
+      variation: 0
+      generator_type: "constant"
+
+  # Digital channels with various configurations
+  digital_channels:
+    # Main circuit breaker - toggles every 30 seconds
+    - name: "CB_MAIN"
+      initial_value: true   # starts closed
+      interval: "30s"
+
+    # Isolator - static (always open)
+    - name: "ISO_1"
+      initial_value: false
+      interval: "0s"        # static
+
+    # Protection relay - normally off
+    - name: "PROT_RELAY_1"
+      initial_value: false
+      interval: "0s"        # only changes on external trigger
+
+    # Ground switch - static closed
+    - name: "GND_SW_1"
+      initial_value: true
+      interval: "0s"
+
+    # Alarm status - fast blinking when active
+    - name: "ALARM_OVERVOLT"
+      initial_value: false
+      interval: "500ms"     # blinks every half second
+
+    # Maintenance mode - long interval
+    - name: "MAINT_MODE"
+      initial_value: false
+      interval: "8h"        # toggles every 8 hours
+
+    # Communication status - simulates occasional drops
+    - name: "COMM_STATUS"
+      initial_value: true
+      interval: "45s"       # toggles to simulate intermittent issues
+
+    # Auxiliary breakers with different timings
+    - name: "CB_AUX_1"
+      initial_value: false
+      interval: "10s"
+
+    - name: "CB_AUX_2"
+      initial_value: true
+      interval: "1m"
+
+    - name: "CB_AUX_3"
+      initial_value: false
+      interval: "15m"
+
+  header: "Advanced PMU Simulator Station"
+
+  log_level: "INFO"

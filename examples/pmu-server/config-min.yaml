@@ -1,0 +1,39 @@
+pmu:
+  station: "WEST"
+  name_prefix: "PMU"
+  port: 4713
+
+  phasors:
+    - name: "V1"
+      type: 0  # voltage
+      phase_angle: 0
+
+    - name: "V2"
+      type: 0
+      phase_angle: 2.0944  # 120°
+
+    - name: "V3"
+      type: 0
+      phase_angle: -2.0944  # -120°
+
+  analog_channels:
+    - name: "FREQUENCY"
+      unit: "Hz"
+      base_value: 50
+
+    - name: "POWER"
+      unit: "MW"
+      base_value: 100
+
+  digital_channels:
+    - name: "CB_LINE_1"
+      initial_value: true   # starts closed
+      interval: "30s"       # toggles every 30 seconds
+
+    - name: "CB_LINE_2"
+      initial_value: false
+      interval: "1m"        # toggles every minute
+
+    - name: "GROUND_SW"
+      initial_value: false  # always open
+      interval: "0s"        # static

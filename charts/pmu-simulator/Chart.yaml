@@ -1,0 +1,5 @@
+apiVersion: v2
+name: pmu-simulator
+type: application
+version: 0.0.0-dev
+appVersion: "1.16.0"

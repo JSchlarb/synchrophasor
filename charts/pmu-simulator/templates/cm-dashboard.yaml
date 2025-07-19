@@ -1,0 +1,13 @@
+{{- if and  .Values.monitoring.enabled  .Values.monitoring.grafanaDashboard.create  }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pmu-simulator.fullname" . }}-dashboard
+  labels:
+    {{ include "pmu-simulator.labels" . | nindent 4 }}
+    {{ with .Values.monitoring.grafanaDashboard.labels}}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  {{- (.Files.Glob "dashboard/*.json").AsConfig | nindent 2 }}
+{{- end }}

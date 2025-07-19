@@ -1,0 +1,125 @@
+on:
+  push:
+    branches: [ main ]
+
+env:
+  GO_VERSION: '1.24.5'
+  REGISTRY: ghcr.io
+
+jobs:
+  test-and-lint:
+    name: Test and Lint
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.vars.outputs.version }}
+      oci_repository: ${{ steps.vars.outputs.oci_repository }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.2.2
+
+      - name: Run tests
+        run: |
+          go test -v -race ./...
+
+      - name: Determine Version and lower repo name
+        id: vars
+        run: |
+          BRANCH=${GITHUB_REF#refs/heads/}
+
+          if git describe --tags --exact-match >/dev/null 2>&1; then
+            VERSION=$(git describe --tags --exact-match)
+          elif LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
+            VERSION=${LAST_TAG}
+          else
+            SHORT_HASH=$(git rev-parse --short HEAD)
+            VERSION="0.0.0-${BRANCH}-${SHORT_HASH}"
+          fi
+          
+          OCI_REPOSITORY=$(echo "${REGISTRY}/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "oci_repository=${OCI_REPOSITORY}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+          echo "OCI Repository: ${OCI_REPOSITORY}"
+
+      - name: Set Version in main.go
+        run: |
+          sed -i "s/const appVersion = \"dev\"/const appVersion = \"${{ steps.vars.outputs.version }}\"/" examples/pmu-server/main.go
+
+  build-and-push:
+    name: Build and Push Docker
+    needs: test-and-lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ needs.test-and-lint.outputs.oci_repository }}/pmu-simulator:${{ needs.test-and-lint.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  helm-push:
+    name: Push Helm Chart
+    needs: test-and-lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Chart | Push
+        uses: appany/helm-oci-chart-releaser@v0.5.0
+        with:
+          name: pmu-simulator
+          repository: ${{ needs.test-and-lint.outputs.oci_repository }}/helm
+          tag: ${{ needs.test-and-lint.outputs.version }}
+          app_version: ${{ needs.test-and-lint.outputs.version }}
+          path: charts/pmu-simulator
+          registry: ghcr.io
+          registry_username: ${{ github.actor }}
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          update_dependencies: 'false'
