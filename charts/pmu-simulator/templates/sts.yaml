@@ -6,6 +6,7 @@ metadata:
     {{- include "pmu-simulator.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "pmu-simulator.fullname" . }}
   selector:
     matchLabels:
       {{- include "pmu-simulator.selectorLabels" . | nindent 6 }}

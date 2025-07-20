@@ -5,12 +5,9 @@ metadata:
   labels:
     {{- include "pmu-simulator.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
-  clusterIP: None
-  clusterIPs:
-    - None
-  internalTrafficPolicy: Cluster
-  sessionAffinity: None
+  {{- with omit .Values.service "port" }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: c37118

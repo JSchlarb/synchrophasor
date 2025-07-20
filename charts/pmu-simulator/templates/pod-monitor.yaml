@@ -4,7 +4,7 @@ kind: PodMonitor
 metadata:
   name: {{ include "pmu-simulator.fullname" . }}
   labels:
-    {{ include "pmu-simulator.labels" . | nindent 4 }}
+    {{- include "pmu-simulator.labels" . | nindent 4 }}
 spec:
   namespaceSelector: { }
   podMetricsEndpoints:
@@ -12,7 +12,7 @@ spec:
       path: /metrics
   selector:
     matchLabels:
-      {{ include "pmu-simulator.selectorLabels" . | nindent 6 }}
+      {{- include "pmu-simulator.selectorLabels" . | nindent 6 }}
     {{- with .Values.monitoring.podMonitorMetricRelabelings }}
       metricRelabelings:
       {{- toYaml . | nindent 6 }}
