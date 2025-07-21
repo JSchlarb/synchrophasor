@@ -32,7 +32,6 @@ LABEL org.opencontainers.image.source=https://github.com/JSchlarb/synchrophasor
 WORKDIR /app
 
 COPY --from=builder /app/pmu-server ./pmu-server
-COPY examples/pmu-server/config.yaml ./config.yaml
 
 USER 65532:65532
 
