@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"math"
 	"net"
 	"strings"
 	"sync"
@@ -305,25 +304,6 @@ func (p *PMU) dataSender() {
 		df := NewDataFrame(p.Config2)
 		df.IDCode = p.Config2.IDCode
 		df.SetTime(nil, nil)
-
-		// Update PMU data (example values)
-		for _, pmu := range p.Config2.PMUStationList {
-			// Update phasor values (example)
-			for i := range pmu.PhasorValues {
-				angle := float64(counter) * math.Pi / 180.0
-				pmu.PhasorValues[i] = complex(30000*math.Cos(angle), 30000*math.Sin(angle))
-			}
-
-			// Update frequency based on nominal frequency
-			nominalFreq := pmu.GetNominalFrequency()
-			pmu.Freq = nominalFreq + 0.5*float32(math.Sin(float64(counter)*0.1))
-			pmu.DFreq = 0.05 * float32(math.Cos(float64(counter)*0.1))
-
-			// Update analog values
-			for i := range pmu.AnalogValues {
-				pmu.AnalogValues[i] = 100.0 * float32(math.Sin(float64(counter)*0.1+float64(i)))
-			}
-		}
 
 		// Pack data frame
 		data, err := df.Pack()

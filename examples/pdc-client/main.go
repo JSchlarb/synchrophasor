@@ -14,7 +14,7 @@ import (
 func main() {
 	pdc := synchrophasor.NewPDC(1) // PDC ID = 1
 
-	address := "localhost:4713"
+	address := "localhost:4712"
 	if len(os.Args) > 1 {
 		address = os.Args[1]
 	}
