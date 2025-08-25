@@ -13,6 +13,8 @@ monitoring:
 
 config:
   pmu:
+    dropTicks: true
+
     station: "CENTRAL"
     name_prefix: "PMU"
     # id: 1 is given via via

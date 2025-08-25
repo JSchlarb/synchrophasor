@@ -177,7 +177,7 @@ func main() {
 
 	// Calculate cycle duration
 	cycleDuration := time.Duration(float64(time.Second) / cfg.PMU.FrequencyBase)
-	ticker := newWallTicker(cycleDuration, 0)
+	ticker := newWallTicker(cycleDuration, 0, cfg.PMU.DropTicks)
 	defer ticker.Stop()
 
 	digitalStates := make([]DigitalChannelState, cfg.GetDigitalCount())

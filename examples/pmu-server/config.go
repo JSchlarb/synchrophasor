@@ -41,6 +41,7 @@ type DigitalChannel struct {
 // Config holds the PMU configuration
 type Config struct {
 	PMU struct {
+		DropTicks          bool    `mapstructure:"dropTicks"`
 		Station            string  `mapstructure:"station"`
 		NamePrefix         string  `mapstructure:"name_prefix"`
 		Name               string  `mapstructure:"name"`
@@ -163,6 +164,7 @@ func loadConfig() (*Config, error) {
 	_ = viper.BindEnv("pmu.increment_id")
 
 	// Set defaults
+	viper.SetDefault("pmu.dropTicks", true)
 	viper.SetDefault("pmu.station", "STATION-01")
 	viper.SetDefault("pmu.name_prefix", "PMU")
 	viper.SetDefault("pmu.ip", "0.0.0.0")
