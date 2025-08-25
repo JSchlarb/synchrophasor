@@ -75,7 +75,8 @@ func (w *wallTicker) tick() {
 				// Log skipped ticks periodically
 				if now.Sub(w.lastLogTime) >= logInterval {
 					if w.skippedTicks > 0 {
-						log.WithField("skipped_ticks", w.skippedTicks).Warnf("Dropped %d ticks in the last %v", w.skippedTicks, logInterval)
+						log.WithField("skipped_ticks", w.skippedTicks).
+							Warnf("Dropped %d ticks in the last %v", w.skippedTicks, logInterval)
 						w.skippedTicks = 0
 					}
 					w.lastLogTime = now
